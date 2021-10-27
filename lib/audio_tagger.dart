@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:audio_tagger/audio_tags.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -14,25 +15,34 @@ class AudioTagger {
   /// Write all (available) Tags into the audio file
   static Future<int> writeAllTags({
     required String songPath,
-    required String title,
-    required String album,
-    required String artist,
-    required String genre,
-    required String year,
-    required String disc,
-    required String track
+    required AudioTags tags,
   }) async {
     int result = await _channel.invokeMethod("writeAllTags", {
       "path":   songPath,
-      "tagsTitle":  title,
-      "tagsAlbum":  album,
-      "tagsArtist": artist,
-      "tagsGenre":  genre,
-      "tagsYear":   year,
-      "tagsDisc":   disc,
-      "tagsTrack":  track
+      "tagsTitle":  tags.title,
+      "tagsAlbum":  tags.album,
+      "tagsArtist": tags.artist,
+      "tagsGenre":  tags.genre,
+      "tagsYear":   tags.year,
+      "tagsDisc":   tags.disc,
+      "tagsTrack":  tags.track
     });
     return result;
+  }
+
+  /// Extract all tags from an audio file
+  static Future<AudioTags?> extractAllTags(String songPath) async {
+    if (await File(songPath).exists()) {
+      final Map<String, dynamic>? map = await _channel
+        .invokeMethod('extractAllTags', {'path': songPath});
+      if (map != null) {
+        return AudioTags.fromMap(map);
+      } else {
+        return null;
+      }
+    } else {
+      throw Exception('AudioTagger: File not found');
+    }
   }
 
   /// Write artwork using local Image or from Url to specified file path
@@ -110,5 +120,8 @@ class AudioTagger {
     ));
     return string;
   }
+
+  
+
 
 }

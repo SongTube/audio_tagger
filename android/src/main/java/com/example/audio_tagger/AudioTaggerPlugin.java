@@ -23,6 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -73,6 +75,12 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
                 tagsDisc,
                 tagsTrack
         ));
+      }
+
+      // Extract all tags from the provided song file
+      if (call.method.equals("extractAllTags")) {
+        String path = call.argument("path");
+        result.success(TagsMethods.extractAllTags(path));
       }
 
       // Write down only the artwork on the provided song file
@@ -169,6 +177,37 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       } catch (InvalidAudioFrameException e) {
         e.printStackTrace();
         return 1;
+      }
+    }
+
+    static Map<String, String> extractAllTags(String path) {
+      File file = new File(path);
+      try {
+        AudioFile audioFile = AudioFileIO.read(file);
+        Map<String, String> map = new HashMap<>();
+        map.put("title", audioFile.getTag().getFirst(FieldKey.TITLE));
+        map.put("album", audioFile.getTag().getFirst(FieldKey.ALBUM));
+        map.put("artist", audioFile.getTag().getFirst(FieldKey.ARTIST));
+        map.put("genre", audioFile.getTag().getFirst(FieldKey.GENRE));
+        map.put("year", audioFile.getTag().getFirst(FieldKey.YEAR));
+        map.put("disc", audioFile.getTag().getFirst(FieldKey.DISC_NO));
+        map.put("track", audioFile.getTag().getFirst(FieldKey.TRACK));
+        return map;
+      } catch (CannotReadException e) {
+        e.printStackTrace();
+        return null;
+      } catch (IOException e) {
+        e.printStackTrace();
+        return null;
+      } catch (TagException e) {
+        e.printStackTrace();
+        return null;
+      } catch (ReadOnlyFileException e) {
+        e.printStackTrace();
+        return null;
+      } catch (InvalidAudioFrameException e) {
+        e.printStackTrace();
+        return null;
       }
     }
 
