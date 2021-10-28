@@ -33,8 +33,8 @@ class AudioTagger {
   /// Extract all tags from an audio file
   static Future<AudioTags?> extractAllTags(String songPath) async {
     if (await File(songPath).exists()) {
-      final Map<String, dynamic>? map = await _channel
-        .invokeMethod('extractAllTags', {'path': songPath});
+      final Map<String, dynamic>? map = Map<String, dynamic>.from(await _channel
+        .invokeMethod('extractAllTags', {'path': songPath}));
       if (map != null) {
         return AudioTags.fromMap(map);
       } else {

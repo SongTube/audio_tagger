@@ -50,7 +50,8 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    final String[] resultMessage = {"Not implemented"};
+    final Map<String, Map<String, String>> resultMessage = new HashMap<>();
+    final Map<String, byte[]> bytes = new HashMap<>();
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     final Handler handler = new Handler(Looper.getMainLooper());
     executor.execute(() -> {
@@ -80,7 +81,7 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       // Extract all tags from the provided song file
       if (call.method.equals("extractAllTags")) {
         String path = call.argument("path");
-        result.success(TagsMethods.extractAllTags(path));
+        resultMessage.put("tags", TagsMethods.extractAllTags(path));
       }
 
       // Write down only the artwork on the provided song file
@@ -96,7 +97,7 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       // Extract the artwork from the provided audio file
       if (call.method.equals("extractArtwork")) {
         String path = call.argument("path");
-        result.success(TagsMethods.extractArtwork(path));
+        bytes.put("bytes", TagsMethods.extractArtwork(path));
       }
 
       // Crop any image file to a square
@@ -106,12 +107,20 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         Bitmap croppedBitmap = cropToSquare(bitmap);
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         croppedBitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream);
-        result.success(new Byte[byteStream.toByteArray().length]);
+        bytes.put("bytes", byteStream.toByteArray());
       }
       handler.post(new Runnable() {
         @Override
         public void run() {
-          result.success(resultMessage[0]);
+          if (call.method.equals("extractArtwork")) {
+            result.success(bytes.get("bytes"));
+          }
+          if (call.method.equals("cropToSquare")) {
+            result.success(bytes.get("bytes"));
+          }
+          if (call.method.equals("extractAllTags")) {
+            result.success(resultMessage.get("tags"));
+          }
         }
       });
     });
