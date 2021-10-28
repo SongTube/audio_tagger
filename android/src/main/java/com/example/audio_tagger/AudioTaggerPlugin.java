@@ -109,18 +109,15 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         croppedBitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream);
         bytes.put("bytes", byteStream.toByteArray());
       }
-      handler.post(new Runnable() {
-        @Override
-        public void run() {
-          if (call.method.equals("extractArtwork")) {
-            result.success(bytes.get("bytes"));
-          }
-          if (call.method.equals("cropToSquare")) {
-            result.success(bytes.get("bytes"));
-          }
-          if (call.method.equals("extractAllTags")) {
-            result.success(resultMessage.get("tags"));
-          }
+      handler.post(() -> {
+        if (call.method.equals("extractArtwork")) {
+          result.success(bytes.get("bytes"));
+        }
+        if (call.method.equals("cropToSquare")) {
+          result.success(bytes.get("bytes"));
+        }
+        if (call.method.equals("extractAllTags")) {
+          result.success(resultMessage.get("tags"));
         }
       });
     });
@@ -169,22 +166,16 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         audioFile.commit();
         return 0;
       } catch (CannotReadException e) {
-        e.printStackTrace();
         return 1;
       } catch (IOException e) {
-        e.printStackTrace();
         return 1;
       } catch (CannotWriteException e) {
-        e.printStackTrace();
         return 1;
       } catch (TagException e) {
-        e.printStackTrace();
         return 1;
       } catch (ReadOnlyFileException e) {
-        e.printStackTrace();
         return 1;
       } catch (InvalidAudioFrameException e) {
-        e.printStackTrace();
         return 1;
       }
     }
@@ -203,19 +194,14 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         map.put("track", audioFile.getTag().getFirst(FieldKey.TRACK));
         return map;
       } catch (CannotReadException e) {
-        e.printStackTrace();
         return null;
       } catch (IOException e) {
-        e.printStackTrace();
         return null;
       } catch (TagException e) {
-        e.printStackTrace();
         return null;
       } catch (ReadOnlyFileException e) {
-        e.printStackTrace();
         return null;
       } catch (InvalidAudioFrameException e) {
-        e.printStackTrace();
         return null;
       }
     }
@@ -234,22 +220,16 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         audioFile.commit();
         return 0;
       } catch (CannotReadException e) {
-        e.printStackTrace();
         return 1;
       } catch (IOException e) {
-        e.printStackTrace();
         return 1;
       } catch (CannotWriteException e) {
-        e.printStackTrace();
         return 1;
       } catch (TagException e) {
-        e.printStackTrace();
         return 1;
       } catch (ReadOnlyFileException e) {
-        e.printStackTrace();
         return 1;
       } catch (InvalidAudioFrameException e) {
-        e.printStackTrace();
         return 1;
       }
     }
@@ -261,19 +241,16 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         Artwork artwork = audioFile.getTag().getFirstArtwork();
         return artwork.getBinaryData();
       } catch (CannotReadException e) {
-        e.printStackTrace();
         return null;
       } catch (IOException e) {
-        e.printStackTrace();
         return null;
       } catch (TagException e) {
-        e.printStackTrace();
         return null;
       } catch (ReadOnlyFileException e) {
-        e.printStackTrace();
         return null;
       } catch (InvalidAudioFrameException e) {
-        e.printStackTrace();
+        return null;
+      } catch (NullPointerException e) {
         return null;
       }
     }
