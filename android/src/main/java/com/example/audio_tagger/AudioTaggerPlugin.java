@@ -52,6 +52,7 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
     final Map<String, Map<String, String>> resultMessage = new HashMap<>();
     final Map<String, byte[]> bytes = new HashMap<>();
+    final Map<String, String> codeResult = new HashMap<>();
     final ExecutorService executor = Executors.newSingleThreadExecutor();
     final Handler handler = new Handler(Looper.getMainLooper());
     executor.execute(() -> {
@@ -66,7 +67,7 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         String tagsYear = call.argument("tagsYear");
         String tagsDisc = call.argument("tagsDisc");
         String tagsTrack = call.argument("tagsTrack");
-        result.success(TagsMethods.writeAllTags(
+        int code = TagsMethods.writeAllTags(
                 path,
                 tagsTitle,
                 tagsAlbum,
@@ -75,7 +76,8 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
                 tagsYear,
                 tagsDisc,
                 tagsTrack
-        ));
+        );
+        codeResult.put("code", String.valueOf(code));
       }
 
       // Extract all tags from the provided song file
@@ -88,10 +90,11 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       if (call.method.equals("writeArtwork")) {
         String path = call.argument("path");
         String artwork = call.argument("artworkPath");
-        result.success(TagsMethods.writeArtwork(
+        int code = TagsMethods.writeArtwork(
                 path,
                 artwork
-        ));
+        );
+        codeResult.put("code", String.valueOf(code));
       }
 
       // Extract the artwork from the provided audio file
@@ -112,12 +115,12 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       handler.post(() -> {
         if (call.method.equals("extractArtwork")) {
           result.success(bytes.get("bytes"));
-        }
-        if (call.method.equals("cropToSquare")) {
+        } else if (call.method.equals("cropToSquare")) {
           result.success(bytes.get("bytes"));
-        }
-        if (call.method.equals("extractAllTags")) {
+        } else if (call.method.equals("extractAllTags")) {
           result.success(resultMessage.get("tags"));
+        } else {
+          result.success(Integer.parseInt(codeResult.get("code")));
         }
       });
     });
