@@ -67,50 +67,73 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         String tagsYear = call.argument("tagsYear");
         String tagsDisc = call.argument("tagsDisc");
         String tagsTrack = call.argument("tagsTrack");
-        int code = TagsMethods.writeAllTags(
-                path,
-                tagsTitle,
-                tagsAlbum,
-                tagsArtist,
-                tagsGenre,
-                tagsYear,
-                tagsDisc,
-                tagsTrack
-        );
-        codeResult.put("code", String.valueOf(code));
+        try {
+          int code = TagsMethods.writeAllTags(
+                  path,
+                  tagsTitle,
+                  tagsAlbum,
+                  tagsArtist,
+                  tagsGenre,
+                  tagsYear,
+                  tagsDisc,
+                  tagsTrack
+          );
+          codeResult.put("code", String.valueOf(code));
+        } catch (Exception e) {
+          codeResult.put("code", String.valueOf(1));
+        }
       }
 
       // Extract all tags from the provided song file
       if (call.method.equals("extractAllTags")) {
         String path = call.argument("path");
-        resultMessage.put("tags", TagsMethods.extractAllTags(path));
+        try {
+          Map<String, String> tags = TagsMethods.extractAllTags(path);
+          resultMessage.put("tags", tags);
+        } catch (Exception e) {
+          resultMessage.put("tags", null);
+        }
       }
 
       // Write down only the artwork on the provided song file
       if (call.method.equals("writeArtwork")) {
         String path = call.argument("path");
         String artwork = call.argument("artworkPath");
-        int code = TagsMethods.writeArtwork(
-                path,
-                artwork
-        );
+        int code;
+        try {
+          code = TagsMethods.writeArtwork(
+                  path,
+                  artwork
+          );
+        } catch (Exception e) {
+          code = 1;
+          codeResult.put("code", String.valueOf(code));
+        }
         codeResult.put("code", String.valueOf(code));
       }
 
       // Extract the artwork from the provided audio file
       if (call.method.equals("extractArtwork")) {
         String path = call.argument("path");
-        bytes.put("bytes", TagsMethods.extractArtwork(path));
+        try {
+          bytes.put("bytes", TagsMethods.extractArtwork(path));
+        } catch (Exception e) {
+          bytes.put("bytes", new byte[0]);
+        }
       }
 
       // Crop any image file to a square
       if (call.method.equals("cropToSquare")) {
-        String path = call.argument("path");
-        Bitmap bitmap = BitmapFactory.decodeFile(path);
-        Bitmap croppedBitmap = cropToSquare(bitmap);
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        croppedBitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream);
-        bytes.put("bytes", byteStream.toByteArray());
+        try {
+          String path = call.argument("path");
+          Bitmap bitmap = BitmapFactory.decodeFile(path);
+          Bitmap croppedBitmap = cropToSquare(bitmap);
+          ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+          croppedBitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream);
+          bytes.put("bytes", byteStream.toByteArray());
+        } catch (Exception e) {
+          bytes.put("bytes", new byte[0]);
+        }
       }
       handler.post(() -> {
         if (call.method.equals("extractArtwork")) {
