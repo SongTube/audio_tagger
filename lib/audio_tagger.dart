@@ -85,6 +85,13 @@ class AudioTagger {
     });
   }
 
+  /// Extract the Thumbnail fron an audio file
+  static Future<Uint8List?> extractThumbnail(String filePath) async {
+    return await _channel.invokeMethod('extractThumbnail', {
+      'path': filePath
+    });
+  }
+
   /// Generate a Square Cover Image from URL
   static Future<File?> generateCover(String url) async {
     File artwork =

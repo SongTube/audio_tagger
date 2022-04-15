@@ -132,6 +132,16 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         }
       }
 
+      // Extract the thumbnail from the provided audio file
+      if (call.method.equals("extractThumbnail")) {
+        String path = call.argument("path");
+        try {
+          bytes.put("bytes", TagsMethods.extractThumbnail(path));
+        } catch (Exception e) {
+          bytes.put("bytes", new byte[0]);
+        }
+      }
+
       // Crop any image file to a square
       if (call.method.equals("cropToSquare")) {
         try {
@@ -146,7 +156,7 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         }
       }
       handler.post(() -> {
-        if (call.method.equals("extractArtwork")) {
+        if (call.method.equals("extractArtwork") || call.method.equals("extractThumbnail")) {
           result.success(bytes.get("bytes"));
         } else if (call.method.equals("cropToSquare")) {
           result.success(bytes.get("bytes"));
