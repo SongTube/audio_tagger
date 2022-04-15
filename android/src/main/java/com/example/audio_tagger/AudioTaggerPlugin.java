@@ -1,9 +1,17 @@
 package com.example.audio_tagger;
 
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 
@@ -41,9 +49,11 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private MethodChannel channel;
+  private static Context context;
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+    context = flutterPluginBinding.getApplicationContext();
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "audio_tagger");
     channel.setMethodCallHandler(this);
   }
@@ -279,6 +289,30 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       } catch (NullPointerException e) {
         return null;
       }
+    }
+
+    static byte[] extractThumbnail(String path) {
+      File file = new File(path);
+      try {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+          Bitmap image = ThumbnailUtils.createAudioThumbnail(file, new Size(200, 200), null);
+          ByteArrayOutputStream stream = new ByteArrayOutputStream();
+          image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+          return stream.toByteArray();
+        } else {
+          MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+          mmr.setDataSource(context, Uri.fromFile(file));
+          byte[] bytes = mmr.getEmbeddedPicture();
+          if (bytes == null) {
+            return new byte[0];
+          } else {
+            return bytes;
+          }
+        }
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      return new byte[0];
     }
 
   }
