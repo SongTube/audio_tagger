@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/audio_tagger.iml" filepath="$PROJECT_DIR$/.idea/modules/audio_tagger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/audio_tagger.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/audio_tagger.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/audio_tagger.main.iml" filepath="$PROJECT_DIR$/.idea/modules/audio_tagger.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/audio_tagger.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/audio_tagger.unitTest.iml" />
     </modules>
   </component>
 </project>

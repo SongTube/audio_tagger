@@ -102,6 +102,7 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
           resultMessage.put("tags", tags);
         } catch (Exception e) {
           resultMessage.put("tags", null);
+          e.printStackTrace();
         }
       }
 
@@ -226,30 +227,18 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       }
     }
 
-    static Map<String, String> extractAllTags(String path) {
+    static Map<String, String> extractAllTags(String path) throws CannotReadException, TagException, InvalidAudioFrameException, ReadOnlyFileException, IOException {
       File file = new File(path);
-      try {
-        AudioFile audioFile = AudioFileIO.read(file);
-        Map<String, String> map = new HashMap<>();
-        map.put("title", audioFile.getTag().getFirst(FieldKey.TITLE));
-        map.put("album", audioFile.getTag().getFirst(FieldKey.ALBUM));
-        map.put("artist", audioFile.getTag().getFirst(FieldKey.ARTIST));
-        map.put("genre", audioFile.getTag().getFirst(FieldKey.GENRE));
-        map.put("year", audioFile.getTag().getFirst(FieldKey.YEAR));
-        map.put("disc", audioFile.getTag().getFirst(FieldKey.DISC_NO));
-        map.put("track", audioFile.getTag().getFirst(FieldKey.TRACK));
-        return map;
-      } catch (CannotReadException e) {
-        return null;
-      } catch (IOException e) {
-        return null;
-      } catch (TagException e) {
-        return null;
-      } catch (ReadOnlyFileException e) {
-        return null;
-      } catch (InvalidAudioFrameException e) {
-        return null;
-      }
+      AudioFile audioFile = AudioFileIO.read(file);
+      Map<String, String> map = new HashMap<>();
+      map.put("title", audioFile.getTag().getFirst(FieldKey.TITLE));
+      map.put("album", audioFile.getTag().getFirst(FieldKey.ALBUM));
+      map.put("artist", audioFile.getTag().getFirst(FieldKey.ARTIST));
+      map.put("genre", audioFile.getTag().getFirst(FieldKey.GENRE));
+      map.put("year", audioFile.getTag().getFirst(FieldKey.YEAR));
+      map.put("disc", audioFile.getTag().getFirst(FieldKey.DISC_NO));
+      map.put("track", audioFile.getTag().getFirst(FieldKey.TRACK));
+      return map;
     }
 
     static int writeArtwork(
