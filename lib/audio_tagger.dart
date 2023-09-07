@@ -92,6 +92,13 @@ class AudioTagger {
     });
   }
 
+  /// Update MediaStore with specified file
+  static Future<void> updateMediaStore(String filePath) async {
+    return await _channel.invokeMethod('updateMediaStore', {
+      'path': filePath
+    });
+  }
+
   /// Generate a Square Cover Image from URL
   static Future<File?> generateCover(String url) async {
     File artwork =

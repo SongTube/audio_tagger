@@ -2,6 +2,7 @@ package com.example.audio_tagger;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
@@ -155,6 +156,16 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         } catch (Exception e) {
           bytes.put("bytes", new byte[0]);
         }
+      }
+      // Update MediaStore with specific file
+      if (call.method.equals("updateMediaStore")) {
+        try {
+          String path = call.argument("path");
+          context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(path))));
+        } catch (Exception e) {
+          codeResult.put("code", String.valueOf(1));
+        }
+        codeResult.put("code", String.valueOf(0));
       }
       handler.post(() -> {
         if (call.method.equals("extractArtwork") || call.method.equals("extractThumbnail")) {
