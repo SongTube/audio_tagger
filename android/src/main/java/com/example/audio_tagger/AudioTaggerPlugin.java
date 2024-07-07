@@ -1,5 +1,7 @@
 package com.example.audio_tagger;
 
+import static android.media.ThumbnailUtils.createAudioThumbnail;
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -138,7 +140,7 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
       if (call.method.equals("extractThumbnail")) {
         String path = call.argument("path");
         try {
-          bytes.put("bytes", TagsMethods.extractThumbnail(path));
+          bytes.put("bytes", TagsMethods.extractThumbnail(path, false));
         } catch (Exception e) {
           bytes.put("bytes", new byte[0]);
         }
@@ -286,26 +288,16 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
         AudioFile audioFile = AudioFileIO.read(file);
         Artwork artwork = audioFile.getTag().getFirstArtwork();
         return artwork.getBinaryData();
-      } catch (CannotReadException e) {
-        return null;
-      } catch (IOException e) {
-        return null;
-      } catch (TagException e) {
-        return null;
-      } catch (ReadOnlyFileException e) {
-        return null;
-      } catch (InvalidAudioFrameException e) {
-        return null;
-      } catch (NullPointerException e) {
-        return null;
+      } catch (Exception e) {
+        return extractThumbnail(path, true);
       }
     }
 
-    static byte[] extractThumbnail(String path) {
+    static byte[] extractThumbnail(String path, boolean highRes) {
       File file = new File(path);
       try {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-          Bitmap image = ThumbnailUtils.createAudioThumbnail(file, new Size(200, 200), null);
+          Bitmap image = createAudioThumbnail(file, new Size(highRes ? 800 : 200, highRes ? 800 : 200), null);
           ByteArrayOutputStream stream = new ByteArrayOutputStream();
           image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
           return stream.toByteArray();
@@ -319,10 +311,16 @@ public class AudioTaggerPlugin implements FlutterPlugin, MethodCallHandler {
             return bytes;
           }
         }
-      } catch (IOException e) {
-        e.printStackTrace();
+      } catch (Exception e) {
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        mmr.setDataSource(context, Uri.fromFile(file));
+        byte[] bytes = mmr.getEmbeddedPicture();
+        if (bytes == null) {
+          return new byte[0];
+        } else {
+          return bytes;
+        }
       }
-      return new byte[0];
     }
 
   }
