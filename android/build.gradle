@@ -1,45 +1,44 @@
 group 'com.example.audio_tagger'
 version '1.0'
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
-    }
-}
-
+// jaudiotagger is only published on JitPack, and the consuming app resolves this
+// plugin's transitive dependencies against *its own* repository list. A plain
+// `repositories` block here covers only this project, so the app build fails
+// with "Could not find com.github.AdrienPoupa:jaudiotagger". Register the
+// repository on every project in the build instead.
+//
+// Apps that lock repositories down with
+// `repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)` must add
+// `maven { url = uri("https://jitpack.io") }` to their own settings.gradle.
 rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }
     }
 }
 
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 30
+    namespace 'com.example.audio_tagger'
+    compileSdk 36
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     defaultConfig {
-        minSdkVersion 16
+        // Was 16. Flutter's own floor is 24.
+        minSdk 24
+    }
+
+    lint {
+        // Don't fail a consumer's build over lint findings in this library.
+        abortOnError false
     }
 }
-
-repositories {
-    // ...
-    maven { url "https://jitpack.io" }
-    mavenCentral()
-}
-
 
 dependencies {
     implementation 'com.github.AdrienPoupa:jaudiotagger:2.2.3'
